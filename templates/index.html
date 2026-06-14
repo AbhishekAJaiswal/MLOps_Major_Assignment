@@ -1,16 +1,400 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Face Classifier</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Face Classifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 50px 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background-color: #f0f1ff;
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background-color: #e8e9ff;
+            transform: scale(1.05);
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: block;
+            color: #667eea;
+        }
+
+        .upload-text {
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 13px;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .preview-container.show {
+            display: block;
+        }
+
+        .preview-image {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-height: 250px;
+            object-fit: cover;
+        }
+
+        .file-info {
+            background: #f0f1ff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-clear {
+            background: #f0f1ff;
+            color: #667eea;
+            border: 1px solid #e0e1ff;
+        }
+
+        .btn-clear:hover {
+            background: #e0e1ff;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f0f1ff;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .result-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-message.show {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <span class="icon">🔍</span>
+            <h1>AI Face Classifier</h1>
+            <p class="subtitle">Upload a face image to get predictions</p>
+        </div>
 
-<h2>Upload Face Image</h2>
+        <form id="uploadForm" action="/predict" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <div class="upload-area" id="uploadArea">
+                    <span class="upload-icon">📸</span>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-hint">PNG, JPG, GIF up to 10MB</div>
+                </div>
+                <input type="file" id="imageInput" name="image" accept="image/*" required>
 
-<form action="/predict" method="post" enctype="multipart/form-data">
-    <input type="file" name="image" accept="image/*" required>
-    <button type="submit">Predict</button>
-</form>
+                <div class="preview-container" id="previewContainer">
+                    <img id="previewImage" class="preview-image" alt="Preview">
+                    <div class="file-info" id="fileInfo"></div>
+                </div>
 
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Analyzing your image...</div>
+                </div>
+
+                <div class="result-message" id="resultMessage"></div>
+            </div>
+
+            <div class="button-group" id="buttonGroup" style="display: none;">
+                <button type="submit" class="btn-submit">🚀 Predict</button>
+                <button type="button" class="btn-clear" onclick="clearImage()">Clear</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const fileInfo = document.getElementById('fileInfo');
+        const buttonGroup = document.getElementById('buttonGroup');
+        const loading = document.getElementById('loading');
+        const resultMessage = document.getElementById('resultMessage');
+        const uploadForm = document.getElementById('uploadForm');
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => imageInput.click());
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                imageInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        // File input change
+        imageInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect() {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewContainer.classList.add('show');
+                uploadArea.style.display = 'none';
+                buttonGroup.style.display = 'flex';
+
+                // File info
+                const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                fileInfo.textContent = `📄 ${file.name} (${sizeMB} MB)`;
+            };
+            reader.readAsDataURL(file);
+
+            // Clear previous messages
+            resultMessage.classList.remove('show');
+        }
+
+        function clearImage() {
+            imageInput.value = '';
+            previewContainer.classList.remove('show');
+            uploadArea.style.display = 'block';
+            buttonGroup.style.display = 'none';
+            loading.classList.remove('show');
+            resultMessage.classList.remove('show');
+        }
+
+        // Form submission
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loading.classList.add('show');
+            buttonGroup.style.display = 'none';
+
+            const formData = new FormData(uploadForm);
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                loading.classList.remove('show');
+                buttonGroup.style.display = 'flex';
+
+                if (response.ok) {
+                    resultMessage.style.background = '#d4edda';
+                    resultMessage.style.color = '#155724';
+                    resultMessage.style.borderLeft = '4px solid #28a745';
+                    resultMessage.innerHTML = `✅ <strong>Prediction:</strong> ${data.predicted_class || 'Success'}`;
+                } else {
+                    resultMessage.style.background = '#f8d7da';
+                    resultMessage.style.color = '#721c24';
+                    resultMessage.style.borderLeft = '4px solid #f5c6cb';
+                    resultMessage.innerHTML = `❌ <strong>Error:</strong> ${data.error || 'Prediction failed'}`;
+                }
+                resultMessage.classList.add('show');
+            } catch (error) {
+                loading.classList.remove('show');
+                buttonGroup.style.display = 'flex';
+                resultMessage.style.background = '#f8d7da';
+                resultMessage.style.color = '#721c24';
+                resultMessage.style.borderLeft = '4px solid #f5c6cb';
+                resultMessage.innerHTML = `❌ <strong>Error:</strong> ${error.message}`;
+                resultMessage.classList.add('show');
+            }
+        });
+    </script>
 </body>
 </html>

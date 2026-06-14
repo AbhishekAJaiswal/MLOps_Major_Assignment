@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import joblib
 import numpy as np
 from PIL import Image
@@ -30,7 +30,7 @@ def predict():
 
     prediction = model.predict([img_array])
 
-    return f"Predicted Class: {prediction[0]}"
+    return jsonify({"predicted_class": int(prediction[0])})
 
 
 if __name__ == "__main__":
