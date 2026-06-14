@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Olivetti Face Classifier</title>
+    <title>Face Classifier</title>
 </head>
 <body>
 
-<h1>Olivetti Face Classifier</h1>
+<h2>Upload Face Image</h2>
 
-<a href="/predict">
-    <button>Predict Face Class</button>
-</a>
+<form action="/predict" method="post" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">Predict</button>
+</form>
 
 </body>
 </html>

@@ -1,5 +1,7 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import joblib
+import numpy as np
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -9,12 +11,27 @@ model = joblib.load("savedmodel.pth")
 def home():
     return render_template("index.html")
 
-@app.route("/predict")
+
+@app.route("/predict", methods=["POST"])
 def predict():
-    sample = [[0.5] * 4096]
-    prediction = model.predict(sample)
+
+    file = request.files["image"]
+
+    img = Image.open(file)
+
+    img = img.convert("L")
+    img = img.resize((64, 64))
+
+    img_array = np.array(img)
+
+    img_array = img_array.flatten()
+
+    img_array = img_array / 255.0
+
+    prediction = model.predict([img_array])
 
     return f"Predicted Class: {prediction[0]}"
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
